@@ -23,6 +23,7 @@ private:
 		
 		std::filesystem::path path{ buf };
 		path = path.parent_path();
+		path.append(L"class_7zip_arch");
 		path.append(L"7z.dll");
 		std::wcout << L"loading 7z.dll: " << path << "\n" << std::flush;;
 

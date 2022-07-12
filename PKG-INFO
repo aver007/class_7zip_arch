@@ -1,6 +1,6 @@
 Metadata-Version: 1.2
 Name: class_7zip_arch
-Version: 1.0
+Version: 1.1
 Summary: Python extension for using 7zip.dll (Example in test/test.py)
 Home-page: https://github.com/aver007/class_7zip_arch
 License: UNKNOWN
