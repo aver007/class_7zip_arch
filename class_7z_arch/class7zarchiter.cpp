@@ -31,8 +31,19 @@ Class7zArchIterator_iternext(PyObject* self)
 		
 		std::wstring path = iterated_7z_arch_object->arch->filepath(iterator->iter_num);
 		std::string path_str{ wstring_to_utf8(path) };
-
-		bytes_vector file_data = std::move(iterated_7z_arch_object->arch->extract_filedata(iterator->iter_num));
+		
+		bytes_vector file_data;
+		try
+		{
+			file_data = std::move(iterated_7z_arch_object->arch->extract_filedata(iterator->iter_num));
+		}
+		catch (...)
+		{
+			std::wcout << L"!!!! there was an exceeeeeption !!!!\n" << std::flush;
+			PyErr_SetString(PyExc_LookupError, "Can't decompress file");
+			(iterator->iter_num)++;
+			return NULL;
+		}
 
 		PyObject* tmp = Py_BuildValue("s#y#", path_str.data(), path_str.length(), file_data.data(), file_data.size());
 		(iterator->iter_num)++;   
