@@ -23,8 +23,14 @@ int Class7zArch_init(CustomObject* self, PyObject* args, PyObject* kwds);
 PyObject* Class7zArch_get_iter(PyObject* self);
 
 PyObject* Class7zArch_files_in_arch(CustomObject* self, PyObject* Py_UNUSED(ignored));
+
+PyObject* Class7zArch_file_size_(CustomObject* self, Py_ssize_t file_num);
 PyObject* Class7zArch_file_size(CustomObject* self, PyObject* args);
+
+PyObject* Class7zArch_file_path_(CustomObject* self, Py_ssize_t file_num);
 PyObject* Class7zArch_file_path(CustomObject* self, PyObject* args);
+
+PyObject* Class7zArch_extract_(CustomObject* self, Py_ssize_t file_num);
 PyObject* Class7zArch_extract(CustomObject* self, PyObject* args);
 
 extern PyMethodDef Class7zArch_methods[];

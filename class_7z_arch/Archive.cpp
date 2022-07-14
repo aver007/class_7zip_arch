@@ -136,12 +136,12 @@ std::size_t Archive::filesize(int num)
 
 bytes_vector Archive::extract_filedata(int num)
 {
-	std::wcout << L"starting extracting " << files[num].index() << '\n' << std::flush;
+	//std::wcout << L"starting extracting " << files[num].index() << '\n' << std::flush;
 
 	bytes_vector extracted;
 	Obj7zlib.mem_extractor().extract(arch_vector, extracted, files[num].index());
 	
-	std::wcout << L"end extracting " << files[num].index() << '\n' << std::flush;
+	//std::wcout << L"end extracting " << files[num].index() << '\n' << std::flush;
 	return std::move(extracted);
 }
 

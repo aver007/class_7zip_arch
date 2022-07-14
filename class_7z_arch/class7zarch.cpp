@@ -1,11 +1,21 @@
 #include "class7zarchiter.h"
 #include "class7zarch.h"
 
+//////////////////////////////////////
+//miscellaneous
+
+static void Class7zArch_check_file_num(CustomObject* self, Py_ssize_t file_num)
+{
+	if (file_num >= self->arch->files_in_arch())
+	{
+		PyErr_SetString(PyExc_IndexError, "Index of archive item is out of bounds");
+	}
+}
+
 /////////////////////////////////////////////////////////////
 // python methods
 
-
-void
+void 
 Class7zArch_dealloc(CustomObject* self)
 {
 	
@@ -50,8 +60,12 @@ Class7zArch_init(CustomObject* self, PyObject* args, PyObject* kwds)
 			delete self->arch;
 		}
 		self->arch = new Archive(pointer_from_python, data_len);
+		
 		if (self->arch == NULL)
+		{
+			PyErr_SetString(PyExc_ValueError, "Can't open archive");
 			return -1;
+		}
 	}
 	catch (...)
 	{
@@ -95,6 +109,19 @@ Class7zArch_files_in_arch(CustomObject* self, PyObject* Py_UNUSED(ignored))
 	return Py_BuildValue("n", n);        /* convert C -> Python */
 }
 
+PyObject*
+Class7zArch_file_size_(CustomObject* self, Py_ssize_t file_num)
+{
+	Class7zArch_check_file_num(self, file_num);
+	if (PyErr_Occurred())
+	{
+		return NULL; // Если была ошибка то прерываем выполнение 
+	}
+
+	Py_ssize_t n = self->arch->filesize(file_num);
+
+	return Py_BuildValue("n", n);        /* convert C -> Python */
+}
 
 PyObject*
 Class7zArch_file_size(CustomObject * self, PyObject * args)
@@ -107,12 +134,32 @@ Class7zArch_file_size(CustomObject * self, PyObject * args)
 
 	if (!PyArg_ParseTuple(args, "n", &file_num))  /* convert Python -> C */
 		return NULL;                              /* null=raise exception */
-
-	Py_ssize_t n = self->arch->filesize(file_num);
-
-	return Py_BuildValue("n", n);        /* convert C -> Python */
+		
+	return Class7zArch_file_size_(self, file_num);        /* convert C -> Python */
 }
 
+PyObject*
+Class7zArch_file_path_(CustomObject* self, Py_ssize_t file_num)
+{
+	Class7zArch_check_file_num(self, file_num);
+	if (PyErr_Occurred())
+	{
+		return NULL; // Если была ошибка то прерываем выполнение 
+	}
+
+	try
+	{
+		std::wstring path = self->arch->filepath(file_num);
+		std::string path_str{ wstring_to_utf8(path) };
+
+		return Py_BuildValue("s#", path_str.data(), path_str.length());        /* convert C -> Python */
+	}
+	catch (...)
+	{
+		PyErr_SetString(PyExc_LookupError, "Can't get filename");
+		return NULL;
+	}
+}
 
 PyObject*
 Class7zArch_file_path(CustomObject * self, PyObject * args)
@@ -126,18 +173,33 @@ Class7zArch_file_path(CustomObject * self, PyObject * args)
 	if (!PyArg_ParseTuple(args, "n", &file_num))  /* convert Python -> C */
 		return NULL;                              /* null=raise exception */
 
+	return Class7zArch_file_path_(self, file_num);
+}
+
+PyObject*
+Class7zArch_extract_(CustomObject* self, Py_ssize_t file_num)
+{
+	Class7zArch_check_file_num(self, file_num);
+	if (PyErr_Occurred())
+	{
+		return NULL; // Если была ошибка то прерываем выполнение 
+	}
+
+	std::wcout << "after Class7zArch_check_file_num\n" << std::flush;
+
 	try
 	{
+		bytes_vector file_data = std::move(self->arch->extract_filedata(file_num));
 
-		std::wstring path = self->arch->filepath(file_num);
-		std::string path_str{ wstring_to_utf8(path) };
-
-		return Py_BuildValue("s#", path_str.data(), path_str.length());        /* convert C -> Python */
-	}catch (...)
+		return Py_BuildValue("y#", file_data.data(), file_data.size());
+	}
+	catch (...)
 	{
-		PyErr_SetString(PyExc_LookupError, "Can't get filename");
+		std::wcout << L"!!!! there was an exceeeeeption !!!!\n" << std::flush;
+		PyErr_SetString(PyExc_LookupError, "Can't decompress archive item");
 		return NULL;
 	}
+
 }
 
 PyObject*
@@ -152,9 +214,8 @@ Class7zArch_extract(CustomObject * self, PyObject * args)
 	if (!PyArg_ParseTuple(args, "n", &file_num))  /* convert Python -> C */
 		return NULL;                              /* null=raise exception */
 
-	bytes_vector file_data = std::move(self->arch->extract_filedata(file_num));
-
-	return Py_BuildValue("y#", file_data.data(), file_data.size());
+	std::wcout << "Class7zArch_extract(" << file_num << ")\n" << std::flush;
+	return Class7zArch_extract_(self, file_num);
 }
 
 /////////////////////////////////////////////////////////////
