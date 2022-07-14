@@ -33,6 +33,8 @@ PyObject* Class7zArch_file_path(CustomObject* self, PyObject* args);
 PyObject* Class7zArch_extract_(CustomObject* self, Py_ssize_t file_num);
 PyObject* Class7zArch_extract(CustomObject* self, PyObject* args);
 
+PyObject* Class7zArch_extract_all(CustomObject* self, PyObject* Py_UNUSED(ignored));
+
 extern PyMethodDef Class7zArch_methods[];
 extern PyTypeObject Class7zArchType;
 

@@ -227,13 +227,63 @@ Class7zArch_extract(CustomObject * self, PyObject * args)
 	return Class7zArch_extract_(self, file_num);
 }
 
+PyObject* Class7zArch_extract_all(CustomObject* self, PyObject* Py_UNUSED(ignored))
+{
+	std::wstring report{L""};
+
+	std::wcout << "111111111111111111\n" << std::flush;
+	// type PyListObject    https://habr.com/ru/post/273045/
+	PyObject * lst{ PyList_New(0) };  // create list object
+	std::wcout << "222222222222222222\n" << std::flush;
+
+	for (Py_ssize_t i=0; i < self->arch->files_in_arch();  i++)
+	{
+		std::wcout << "333333333333333333333 " << i << "\n" << std::flush;
+		
+		PyObject* path = Class7zArch_file_path_(self, i);
+		if (!path)
+		{
+			std::wcout << "Bad path " << i << "\n" << std::flush;
+			// записывать в report данные о нераспакованном файле. (нужно записывать хот€бы чтото)
+		}
+		PyErr_Clear(); 		//!!!!!!!!!!  сбросить записи обо всех ошибках !!!!!!!
+
+		PyObject* size = Class7zArch_file_size_(self, i);
+		if (!size)
+		{
+			std::wcout << "Bad size " << i << "\n" << std::flush;
+			// записывать в report данные о нераспакованном файле. (нужно записывать хот€бы чтото)
+		}
+		PyErr_Clear(); 		//!!!!!!!!!!  сбросить записи обо всех ошибках !!!!!!!
+
+		PyObject* data = Class7zArch_extract_(self, i);
+		if (!data)
+		{
+			std::wcout << "Bad extract " << i << "\n" << std::flush;
+			// записывать в report данные о нераспакованном файле. (нужно записывать хот€бы чтото)
+		}
+		PyErr_Clear(); 		//!!!!!!!!!!  сбросить записи обо всех ошибках !!!!!!!
+		
+		if (path && size && data)  // если получена вс€ информаци€ то можно добавл€ть к списку извлеченных
+		{
+			std::wcout << "999999999999999999999 " << i << "\n" << std::flush;
+			PyObject* tuple{ PyTuple_Pack(3, path, size, data) };   // create tuple object
+			PyList_Append(lst, tuple);
+		}
+		
+	}
+	std::wcout << "444444444444444444444\n" << std::flush;
+	return lst;
+}
+
 /////////////////////////////////////////////////////////////
 // register methods
 PyMethodDef Class7zArch_methods[] = {
 	{"files_in_arch", (PyCFunction)Class7zArch_files_in_arch, METH_NOARGS, "Return number of files in archive"},
-	{"file_size", (PyCFunction)Class7zArch_file_size, METH_VARARGS, "Return file size by number"},
-	{"file_path", (PyCFunction)Class7zArch_file_path, METH_VARARGS, "Return file path by number"},
-	{"extract", (PyCFunction)Class7zArch_extract, METH_VARARGS, "Extract file data by number"},
+	{"file_size", (PyCFunction)Class7zArch_file_size, METH_VARARGS, "Return item size by number"},
+	{"file_path", (PyCFunction)Class7zArch_file_path, METH_VARARGS, "Return item path by number"},
+	{"extract", (PyCFunction)Class7zArch_extract, METH_VARARGS, "Extract item data by number"},
+	{"extract_all", (PyCFunction)Class7zArch_extract_all, METH_NOARGS, "Extract all items and make report"},
 	{NULL}  /* Sentinel */
 };
 
