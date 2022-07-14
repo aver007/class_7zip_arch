@@ -43,12 +43,21 @@ Class7zArch_init(CustomObject* self, PyObject* args, PyObject* kwds)
 	if (!PyArg_ParseTuple(args, "y#", &pointer_from_python, &data_len))  /* convert Python -> C */
 		return -1;
 
-	if (self->arch != NULL)
-		delete self->arch;
-
-	self->arch = new Archive(pointer_from_python, data_len);        
-	if (self->arch == NULL)
-		return -1;           
+	try
+	{
+		if (self->arch != NULL)
+		{
+			delete self->arch;
+		}
+		self->arch = new Archive(pointer_from_python, data_len);
+		if (self->arch == NULL)
+			return -1;
+	}
+	catch (...)
+	{
+		PyErr_SetString(PyExc_ValueError, "Can't open archive");
+		return -1;
+	}
 
 	return 0;
 }

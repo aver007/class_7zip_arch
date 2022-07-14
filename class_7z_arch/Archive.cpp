@@ -71,8 +71,6 @@ public:
 
 static Cls7zDllInitializer Obj7zlib;
 
-//static bit7z::Bit7zLibrary lib{ L"7z.dll" };
-//static bit7z::BitMemExtractor mem_extractor{ lib };//, bit7z::BitFormat::SevenZip};   // Может сделать локальным в функции (не будет ли конфликтов при одновременном использовании???)
 
 bytes_vector bytes_to_vector(const char* bytes_pointer, long long int size)
 {
@@ -102,11 +100,14 @@ Archive::Archive(bytes_vector bv)
 	files = arch_informator.items();
 	files_count = files.size();
 
-	/* Вывод списка всех файлов
+
+	/*
+	std::wcout << "\\\\\\\\\\\\\\\\\\\\\n" << std::flush;
+	 //Вывод списка всех файлов
 	for (auto& item : files)
 	{
 		std::wcout << item.index() << "\t" << item.name() << "\t" << item.extension() << "\t";
-		std::wcout << item.path() << "\t" << item.size() << "\t" << item.packSize() << "\n";
+		std::wcout << item.path() << "\t" << item.size() << "\t" << item.packSize() << "\n" << std::flush;;
 	}
 	*/
 
