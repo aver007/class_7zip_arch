@@ -34,9 +34,10 @@ Class7zArchIterator_iternext(PyObject* self)
 	}
 	
 	PyObject* path = Class7zArch_file_path_(iterated_7z_arch_object, iterator->iter_num);
+	PyObject* size = Class7zArch_file_size_(iterated_7z_arch_object, iterator->iter_num);
 	PyObject* data = Class7zArch_extract_(iterated_7z_arch_object, iterator->iter_num);
 
-	PyObject* tmp = Py_BuildValue("NN", path, data);    // "NN" don't increments reference count to path and data objects
+	PyObject* tmp = Py_BuildValue("NNN", path, size, data);    // "NNN" don't increments reference count to path and data objects
 	(iterator->iter_num)++;   
 
 	return tmp;

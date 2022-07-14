@@ -71,7 +71,6 @@ public:
 
 static Cls7zDllInitializer Obj7zlib;
 
-
 bytes_vector bytes_to_vector(const char* bytes_pointer, long long int size)
 {
 	// !!!!!!!!!!!!! ќсвобождает пам€ть по переданному указателю !!!!!!!!!!!!!!!! todo !!!

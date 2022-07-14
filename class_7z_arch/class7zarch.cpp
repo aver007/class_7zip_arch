@@ -118,9 +118,18 @@ Class7zArch_file_size_(CustomObject* self, Py_ssize_t file_num)
 		return NULL; // Если была ошибка то прерываем выполнение 
 	}
 
-	Py_ssize_t n = self->arch->filesize(file_num);
+	try
+	{
+		Py_ssize_t n = self->arch->filesize(file_num);
+		return Py_BuildValue("n", n);        /* convert C -> Python */
 
-	return Py_BuildValue("n", n);        /* convert C -> Python */
+	}catch (...)
+	{
+		PyErr_SetString(PyExc_LookupError, "Can't get item's size");
+		return NULL;
+	}
+
+	return NULL;
 }
 
 PyObject*
@@ -156,7 +165,7 @@ Class7zArch_file_path_(CustomObject* self, Py_ssize_t file_num)
 	}
 	catch (...)
 	{
-		PyErr_SetString(PyExc_LookupError, "Can't get filename");
+		PyErr_SetString(PyExc_LookupError, "Can't get item's filename");
 		return NULL;
 	}
 }
@@ -185,7 +194,7 @@ Class7zArch_extract_(CustomObject* self, Py_ssize_t file_num)
 		return NULL; // Если была ошибка то прерываем выполнение 
 	}
 
-	std::wcout << "after Class7zArch_check_file_num\n" << std::flush;
+	//std::wcout << "after Class7zArch_check_file_num\n" << std::flush;
 
 	try
 	{
@@ -195,7 +204,7 @@ Class7zArch_extract_(CustomObject* self, Py_ssize_t file_num)
 	}
 	catch (...)
 	{
-		std::wcout << L"!!!! there was an exceeeeeption !!!!\n" << std::flush;
+		//std::wcout << L"!!!! there was an exceeeeeption !!!!\n" << std::flush;
 		PyErr_SetString(PyExc_LookupError, "Can't decompress archive item");
 		return NULL;
 	}
