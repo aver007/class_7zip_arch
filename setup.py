@@ -3,8 +3,8 @@ from setuptools import Extension, setup, find_packages
 
 setup(
     name="class_7zip_arch",
-    version='1.1',
-    description='Python extension for using 7zip.dll (Example in test/test.py)',
+    version='1.2',
+    description='Python extension for using 7zip.dll in memory (Example in test/test.py)',
     url='https://github.com/aver007/class_7zip_arch',
     python_requires=">=3.8, <4",
     packages=["class_7zip_arch"],
@@ -20,12 +20,13 @@ setup(
         "libs7z/*.*",
         "libs7z/include/*.*",
         "test/*.*",
+        "test/cts/*.*",
     ]},
 
 
     ext_modules=[
         Extension(
-            name = "class_7zip_arch",  # as it would be imported
+            name="class_7zip_arch",  # as it would be imported
 
             sources=[
                 "class_7z_arch/_main.cpp",

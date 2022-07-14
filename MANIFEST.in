@@ -3,3 +3,4 @@ include class_7z_arch/libs7z/include/*.hpp
 include class_7z_arch/libs7z/*.lib
 include class_7z_arch/7z.dll
 include class_7z_arch/test/*.*
+include class_7z_arch/test/cts/*.*
