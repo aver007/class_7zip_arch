@@ -86,7 +86,6 @@ Class7zArch_get_iter(PyObject* self)
 PyObject*
 Class7zArch_files_in_arch(CustomObject* self, PyObject* Py_UNUSED(ignored))
 {
-
 	if (self->arch == NULL)
 		//PyErr_SetString(PyExc_AttributeError, "ZLP");
 		return NULL;
@@ -127,10 +126,18 @@ Class7zArch_file_path(CustomObject * self, PyObject * args)
 	if (!PyArg_ParseTuple(args, "n", &file_num))  /* convert Python -> C */
 		return NULL;                              /* null=raise exception */
 
-	std::wstring path = self->arch->filepath(file_num);
-	std::string path_str{ wstring_to_utf8(path) };
+	try
+	{
 
-	return Py_BuildValue("s#", path_str.data(), path_str.length());        /* convert C -> Python */
+		std::wstring path = self->arch->filepath(file_num);
+		std::string path_str{ wstring_to_utf8(path) };
+
+		return Py_BuildValue("s#", path_str.data(), path_str.length());        /* convert C -> Python */
+	}catch (...)
+	{
+		PyErr_SetString(PyExc_LookupError, "Can't get filename");
+		return NULL;
+	}
 }
 
 PyObject*
