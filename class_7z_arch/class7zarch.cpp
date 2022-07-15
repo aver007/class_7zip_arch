@@ -227,23 +227,78 @@ Class7zArch_extract(CustomObject * self, PyObject * args)
 	return Class7zArch_extract_(self, file_num);
 }
 
+static std::wstring _get_wstring(PyObject* path)
+{
+	//std::wcout << "zzzzzzz " << "\n" << std::flush;
+	std::wstring tmp{ utf8_to_wstring(PyUnicode_AsUTF8(path) ) };
+	//std::string tmp2{ };
+	//std::wcout << L"xxxxxxxx " << tmp << L"%%%%%%%%\n" << std::flush;
+	return tmp ;
+}
+
+
+static std::wstring _get_report_line(PyObject* path, PyObject* size, PyObject* data)
+{
+	std::wstring line{L""};
+	if (!path)
+	{
+		// если путь не определился
+		line.append(L"?????????????????????????");
+	}
+	else {
+		std::wcout << "yyyyyy " << "\n" << std::flush;
+		std::wstring tmp{ _get_wstring(path) };
+		line.append(tmp);
+	}
+	line.append(L"\t\t");
+
+	Py_ssize_t declared_size = 0 ;
+	if (!size)
+	{
+		// если размер не определился
+		line.append(L"?????");
+	}
+	else {
+		declared_size = PyLong_AsSsize_t(size);
+	}
+	line.append(L"\t");
+
+	if (!data)
+	{
+		line.append(L"NOT DECOMPRESSED");
+	}
+	else {  // если распаковалось то проверяем соответствие размера
+		Py_ssize_t decompressed_size = Py_SIZE(data);
+		if (declared_size != decompressed_size)
+		{
+			line.append(L"SIZE DOESN'T CORRESPONDS TO DECLARED");
+		}
+		else
+		{
+			line.append(L"OK");
+		}
+	}
+
+	return line;
+}
+
 PyObject* Class7zArch_extract_all(CustomObject* self, PyObject* Py_UNUSED(ignored))
 {
 	std::wstring report{L""};
 
-	std::wcout << "111111111111111111\n" << std::flush;
+	std::wcout << L"111111111111111111\n" << std::flush;
 	// type PyListObject    https://habr.com/ru/post/273045/
 	PyObject * lst{ PyList_New(0) };  // create list object
-	std::wcout << "222222222222222222\n" << std::flush;
+	std::wcout << L"222222222222222222\n" << std::flush;
 
 	for (Py_ssize_t i=0; i < self->arch->files_in_arch();  i++)
 	{
-		std::wcout << "333333333333333333333 " << i << "\n" << std::flush;
-		
+		std::wcout << L"333333333333333333333 " << i << "\n" << std::flush;
+	
 		PyObject* path = Class7zArch_file_path_(self, i);
 		if (!path)
 		{
-			std::wcout << "Bad path " << i << "\n" << std::flush;
+			std::wcout << L"Bad path " << i << "\n" << std::flush;
 			// записывать в report данные о нераспакованном файле. (нужно записывать хотябы чтото)
 		}
 		PyErr_Clear(); 		//!!!!!!!!!!  сбросить записи обо всех ошибках !!!!!!!
@@ -251,7 +306,7 @@ PyObject* Class7zArch_extract_all(CustomObject* self, PyObject* Py_UNUSED(ignore
 		PyObject* size = Class7zArch_file_size_(self, i);
 		if (!size)
 		{
-			std::wcout << "Bad size " << i << "\n" << std::flush;
+			std::wcout << L"Bad size " << i << "\n" << std::flush;
 			// записывать в report данные о нераспакованном файле. (нужно записывать хотябы чтото)
 		}
 		PyErr_Clear(); 		//!!!!!!!!!!  сбросить записи обо всех ошибках !!!!!!!
@@ -259,21 +314,32 @@ PyObject* Class7zArch_extract_all(CustomObject* self, PyObject* Py_UNUSED(ignore
 		PyObject* data = Class7zArch_extract_(self, i);
 		if (!data)
 		{
-			std::wcout << "Bad extract " << i << "\n" << std::flush;
+			std::wcout << L"Bad extract " << i << "\n" << std::flush;
 			// записывать в report данные о нераспакованном файле. (нужно записывать хотябы чтото)
 		}
 		PyErr_Clear(); 		//!!!!!!!!!!  сбросить записи обо всех ошибках !!!!!!!
 		
+		std::wcout << L";;;;;;;; " << i << "\n" << std::flush;
 		if (path && size && data)  // если получена вся информация то можно добавлять к списку извлеченных
 		{
-			std::wcout << "999999999999999999999 " << i << "\n" << std::flush;
+			std::wcout << L"999999999999999999999 " << i << "\n" << std::flush;
 			PyObject* tuple{ PyTuple_Pack(3, path, size, data) };   // create tuple object
 			PyList_Append(lst, tuple);
 		}
-		
+		std::wcout << L"++++++" << "\n" << std::flush;
+		//// добавляем данные report'а
+		std::wstring report_line{ _get_report_line(path, size, data) };
+		std::wcout << L"+++++1" << "\n" << std::flush;
+		report.append(report_line);
+		std::wcout << L"+++++2" << "\n" << std::flush;
+		report.append(L"\n");
+		std::wcout << L"+++++3" << "\n\n" << std::flush;
 	}
-	std::wcout << "444444444444444444444\n" << std::flush;
-	return lst;
+	std::wcout << L"444444444444444444444\n" << std::flush;
+
+	PyObject* py_report{ PyUnicode_FromString(wstring_to_utf8(report).c_str())};
+	PyObject* rezult{ PyTuple_Pack(2, py_report, lst) };
+	return rezult;
 }
 
 /////////////////////////////////////////////////////////////
