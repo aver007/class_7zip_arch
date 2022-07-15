@@ -260,8 +260,9 @@ static std::wstring _get_report_line(PyObject* path, PyObject* size, PyObject* d
 	}
 	else {
 		declared_size = PyLong_AsSsize_t(size);
+		line.append(std::to_wstring(declared_size));
 	}
-	line.append(L"\t");
+	line.append(L"\t\t");
 
 	if (!data)
 	{

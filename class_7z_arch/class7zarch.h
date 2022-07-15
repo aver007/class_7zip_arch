@@ -3,6 +3,7 @@
 #include <Python.h>
 #include "Archive.h"
 #include "misc.h"
+#include <string>
 
 
 /////////////////////////////////////////////////////////////
