@@ -246,7 +246,6 @@ static std::wstring _get_report_line(PyObject* path, PyObject* size, PyObject* d
 		line.append(L"?????????????????????????");
 	}
 	else {
-		std::wcout << "yyyyyy " << "\n" << std::flush;
 		std::wstring tmp{ _get_wstring(path) };
 		line.append(tmp);
 	}
@@ -287,57 +286,31 @@ PyObject* Class7zArch_extract_all(CustomObject* self, PyObject* Py_UNUSED(ignore
 {
 	std::wstring report{L""};
 
-	std::wcout << L"111111111111111111\n" << std::flush;
 	// type PyListObject    https://habr.com/ru/post/273045/
 	PyObject * lst{ PyList_New(0) };  // create list object
-	std::wcout << L"222222222222222222\n" << std::flush;
-
+	
 	for (Py_ssize_t i=0; i < self->arch->files_in_arch();  i++)
 	{
-		std::wcout << L"333333333333333333333 " << i << "\n" << std::flush;
-	
 		PyObject* path = Class7zArch_file_path_(self, i);
-		if (!path)
-		{
-			std::wcout << L"Bad path " << i << "\n" << std::flush;
-			// записывать в report данные о нераспакованном файле. (нужно записывать хот€бы чтото)
-		}
 		PyErr_Clear(); 		//!!!!!!!!!!  сбросить записи обо всех ошибках !!!!!!!
 
 		PyObject* size = Class7zArch_file_size_(self, i);
-		if (!size)
-		{
-			std::wcout << L"Bad size " << i << "\n" << std::flush;
-			// записывать в report данные о нераспакованном файле. (нужно записывать хот€бы чтото)
-		}
 		PyErr_Clear(); 		//!!!!!!!!!!  сбросить записи обо всех ошибках !!!!!!!
 
 		PyObject* data = Class7zArch_extract_(self, i);
-		if (!data)
-		{
-			std::wcout << L"Bad extract " << i << "\n" << std::flush;
-			// записывать в report данные о нераспакованном файле. (нужно записывать хот€бы чтото)
-		}
 		PyErr_Clear(); 		//!!!!!!!!!!  сбросить записи обо всех ошибках !!!!!!!
 		
-		std::wcout << L";;;;;;;; " << i << "\n" << std::flush;
 		if (path && size && data)  // если получена вс€ информаци€ то можно добавл€ть к списку извлеченных
 		{
-			std::wcout << L"999999999999999999999 " << i << "\n" << std::flush;
 			PyObject* tuple{ PyTuple_Pack(3, path, size, data) };   // create tuple object
 			PyList_Append(lst, tuple);
 		}
-		std::wcout << L"++++++" << "\n" << std::flush;
+		
 		//// добавл€ем данные report'а
-		std::wstring report_line{ _get_report_line(path, size, data) };
-		std::wcout << L"+++++1" << "\n" << std::flush;
-		report.append(report_line);
-		std::wcout << L"+++++2" << "\n" << std::flush;
+		report.append(_get_report_line(path, size, data));
 		report.append(L"\n");
-		std::wcout << L"+++++3" << "\n\n" << std::flush;
 	}
-	std::wcout << L"444444444444444444444\n" << std::flush;
-
+	
 	PyObject* py_report{ PyUnicode_FromString(wstring_to_utf8(report).c_str())};
 	PyObject* rezult{ PyTuple_Pack(2, py_report, lst) };
 	return rezult;
