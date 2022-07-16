@@ -288,7 +288,8 @@ PyObject* Class7zArch_extract_all(CustomObject* self, PyObject* Py_UNUSED(ignore
 
 	// type PyListObject    https://habr.com/ru/post/273045/
 	PyObject * lst{ PyList_New(0) };  // create list object
-	
+	bool is_ok{true};
+
 	for (Py_ssize_t i=0; i < self->arch->files_in_arch();  i++)
 	{
 		PyObject* path = Class7zArch_file_path_(self, i);
@@ -305,6 +306,10 @@ PyObject* Class7zArch_extract_all(CustomObject* self, PyObject* Py_UNUSED(ignore
 			PyObject* tuple{ PyTuple_Pack(3, path, size, data) };   // create tuple object
 			PyList_Append(lst, tuple);
 		}
+		else
+		{
+			is_ok = false; // была ошибка при распаковке
+		}
 		
 		//// добавляем данные report'а
 		report.append(_get_report_line(path, size, data));
@@ -312,7 +317,17 @@ PyObject* Class7zArch_extract_all(CustomObject* self, PyObject* Py_UNUSED(ignore
 	}
 	
 	PyObject* py_report{ PyUnicode_FromString(wstring_to_utf8(report).c_str())};
-	PyObject* rezult{ PyTuple_Pack(2, py_report, lst) };
+
+	PyObject* rezult;
+	if (is_ok)
+	{
+		rezult = PyTuple_Pack(3, Py_True, py_report, lst);  // Распаковка была без ошибок
+	}
+	else
+	{
+		rezult = PyTuple_Pack(3, Py_False, py_report, lst); // Распаковка была с ошибками
+	}
+	
 	return rezult;
 }
 
