@@ -24,14 +24,20 @@ PyInit_class_7zip_arch(void)
 
 	PyObject* m;
 	if (PyType_Ready(&Class7zArchType) < 0)
+	{
 		return NULL;
+	}
 
 	if (PyType_Ready(&Class7zArchIteratorType) < 0)
+	{
 		return NULL;
+	}
 
 	m = PyModule_Create(&class_7z_archmodule);
 	if (m == NULL)
+	{
 		return NULL;
+	}
 
 	Py_INCREF(&Class7zArchType);
 	if (PyModule_AddObject(m, "Class7zArch", (PyObject*)& Class7zArchType) < 0) {

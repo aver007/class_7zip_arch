@@ -10,7 +10,7 @@ Class7zArchIterator_dealloc(CustomIteratorObject* self)
 
 	
 	Py_TYPE(self)->tp_free((PyObject*)self);         
-	std::wcout << "==Iterator_dealloc === " << self << "\n" << std::flush;
+	//std::wcout << "==Iterator_dealloc === " << self << "\n" << std::flush;
 }
 
 
@@ -19,8 +19,10 @@ Class7zArchIterator_iternext(PyObject* self)
 {
 	CustomIteratorObject* iterator = (CustomIteratorObject*)self;
 	if (iterator->class_7z_arch_object == NULL)
-		//PyErr_SetString(PyExc_AttributeError, "ZLP");
+	{
+		PyErr_SetString(PyExc_RuntimeError, "Iterator isn't linked to archive");
 		return NULL;
+	}
 
 	CustomObject* iterated_7z_arch_object = (CustomObject*)iterator->class_7z_arch_object;
 
