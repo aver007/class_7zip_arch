@@ -15,22 +15,22 @@ private:
 	bit7z::Bit7zLibrary& _get_lib()
 	{
 		LPWSTR buf { new wchar_t[MAX_PATH] };
-		std::wcout << L"== Loading extension module (.pyd)\n" << std::flush;;
+		std::wcout << L"== Loading extension module (.pyd)" << std::endl << std::flush;;
 		HMODULE hm{ GetCurrentModule() };
-		std::wcout << L"HMODULE is " << hm << "\n" << std::flush;;
+		std::wcout << L"HMODULE is " << hm << std::endl << std::flush;;
 		GetModuleFileNameW(hm, buf, MAX_PATH);
-		std::wcout << L"module name: " << buf << "\n" << std::flush;;
+		std::wcout << L"module name: " << buf << std::endl << std::flush;;
 		
 		std::filesystem::path path{ buf };
 		path = path.parent_path();
 		path.append(L"class_7zip_arch");
 		path.append(L"7z.dll");
-		std::wcout << L"loading 7z.dll: " << path << "\n" << std::flush;;
+		std::wcout << L"loading 7z.dll: " << path << std::endl << std::flush;;
 
 		delete[] buf;
 		////////////////////////////////////////
 
-		std::wcout << "Loading 7z.dll\n" << std::flush;
+		std::wcout << L"Loading 7z.dll" << std::endl << std::flush;
 		static bit7z::Bit7zLibrary lllib{ path.wstring() };
 		return lllib;
 	}
@@ -49,12 +49,12 @@ public:
 	Cls7zDllInitializer()
 		:m_lib{ _get_lib() }, m_mem_extractor{_get_extractor()}
 	{
-		std::wcout << "Extension module loaded\n\n" << std::flush;
+		std::wcout << L"Extension module loaded" << std::endl << std::endl << std::flush;
 	}
 
 	~Cls7zDllInitializer()
 	{
-		std::wcout << "Extension module unloaded\n\n" << std::flush;
+		std::wcout << L"Extension module unloaded" << std::endl << std::endl << std::flush;
 	}
 
 	bit7z::Bit7zLibrary& lib()
@@ -160,6 +160,11 @@ std::size_t Archive::save_to_file(int num, const std::wstring& path = L"")
 std::size_t Archive::files_in_arch()
 {
 	return files_count;
+}
+
+bit7z::BitArchiveInfo& Archive::arch_info()
+{
+	return arch_informator;
 }
 
 Archive::~Archive()

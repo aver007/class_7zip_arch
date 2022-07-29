@@ -4,3 +4,4 @@ class_7z_arch/x64/*
 .idea/*
 build/
 dist/
+class_7zip_arch.egg-info/*

@@ -32,6 +32,7 @@ public:
 	bytes_vector extract_filedata(int num);
 	std::size_t save_to_file(int num, const std::wstring& path);
 	std::size_t files_in_arch();
+	bit7z::BitArchiveInfo& arch_info();
 	~Archive();
 };
 

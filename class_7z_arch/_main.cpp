@@ -20,7 +20,7 @@ PyMODINIT_FUNC
 PyInit_class_7zip_arch(void)
 {
 
-	std::wcout << "class_7zip_arch module: Initializing\n" << std::flush;
+	std::wcout << L"class_7zip_arch module: Initializing" << std::endl << std::flush;
 
 	PyObject* m;
 	if (PyType_Ready(&Class7zArchType) < 0)
@@ -54,6 +54,6 @@ PyInit_class_7zip_arch(void)
 		return NULL;
 	}
 
-	std::wcout << "class_7zip_arch module: pass module to python interpreter\n" << std::flush;
+	std::wcout << L"class_7zip_arch module: pass module to python interpreter" << std::endl << std::flush;
 	return m;
 }

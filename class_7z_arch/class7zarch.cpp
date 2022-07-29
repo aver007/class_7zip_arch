@@ -21,6 +21,7 @@ static std::wstring _get_wstring(PyObject* path)
 
 static std::wstring _get_report_line(PyObject* path, PyObject* size, PyObject* data)
 {
+
 	std::wstring line{ L"" };
 	if (!path)
 	{
@@ -49,7 +50,17 @@ static std::wstring _get_report_line(PyObject* path, PyObject* size, PyObject* d
 		line.append(L"NOT DECOMPRESSED");
 	}
 	else {  // if unpacked check actual size
-		Py_ssize_t decompressed_size = PyBytes_Size(data);
+
+		Py_ssize_t decompressed_size = 0;
+		if (data)
+		{
+			if (Py_TYPE(data) == &PyBytes_Type)
+			{
+				decompressed_size = PyBytes_Size(data);
+			}
+
+		}
+
 		if (declared_size != decompressed_size)
 		{
 			line.append(L"SIZE DOESN'T CORRESPONDS TO DECLARED");
@@ -58,6 +69,8 @@ static std::wstring _get_report_line(PyObject* path, PyObject* size, PyObject* d
 		{
 			line.append(L"OK");
 		}
+
+		
 	}
 
 	return line;
@@ -76,7 +89,7 @@ Class7zArch_dealloc(CustomObject* self)
 	}
 
 	Py_TYPE(self)->tp_free((PyObject*)self);
-	//std::wcout << "==Class7zArch_dealloc === " << self << "\n" << std::flush;
+	//std::wcout << "==Class7zArch_dealloc === " << self << std::endl << std::flush;
 }
 
 
@@ -88,7 +101,7 @@ Class7zArch_new(PyTypeObject* type, PyObject* args, PyObject* kwds)
 	if (self != NULL) {
 		// nothing to prepare for init
 	}
-	//std::wcout << "===Class7zArch_new ==== " << self << "\n" << std::flush;
+	//std::wcout << "===Class7zArch_new ==== " << self << std::endl << std::flush;
 
 	return (PyObject*)self;
 }
@@ -142,7 +155,7 @@ Class7zArch_get_iter(PyObject* self)
 	itr->class_7z_arch_object = (PyObject*)self;
 	itr->iter_num = 0;
 
-	//std::wcout << "==Iterator_MAKE === " << itr << "\n" << std::flush;
+	//std::wcout << "==Iterator_MAKE === " << itr << std::endl << std::flush;
 	return (PyObject*)itr;
 }
 
@@ -209,6 +222,7 @@ Class7zArch_file_size(CustomObject * self, PyObject * args)
 PyObject*
 Class7zArch_file_path_(CustomObject* self, Py_ssize_t file_num)
 {
+	
 	Class7zArch_check_file_num(self, file_num);
 	if (PyErr_Occurred())
 	{
@@ -218,6 +232,7 @@ Class7zArch_file_path_(CustomObject* self, Py_ssize_t file_num)
 	try
 	{
 		std::wstring path = self->arch->filepath(file_num);
+		
 		std::string path_str{ wstring_to_utf8(path) };
 
 		return Py_BuildValue("s#", path_str.data(), path_str.length());        /* convert C -> Python */
@@ -260,9 +275,21 @@ Class7zArch_extract_(CustomObject* self, Py_ssize_t file_num)
 		
 	try
 	{
+		
+		if (self->arch->arch_info().items()[file_num].isDir()) // Если директория то возвращаем None
+		{
+			return Py_None;
+		}
+		
 		bytes_vector file_data = std::move(self->arch->extract_filedata(file_num));
 
+		if (file_data.size() == 0)
+		{
+			return Py_BuildValue("y#", "", 0);  // чтобы создать пустой объект bytes (а не None в случае file_data.data()==Null)
+		}
+		
 		return Py_BuildValue("y#", file_data.data(), file_data.size());
+				
 	}
 	catch (...)
 	{
@@ -312,15 +339,16 @@ PyObject* Class7zArch_extract_all(CustomObject* self, PyObject* Py_UNUSED(ignore
 		
 		PyObject* data = Class7zArch_extract_(self, i);
 		PyErr_Clear(); 		//!!!!!!!!!!    clear errors
-		
+
 		if (path && size && data)  // if all OK, add info to list
-		{
+		{	
 			PyObject* tuple{ PyTuple_Pack(3, path, size, data) };   // create tuple object
 			Py_DECREF(path);
 			Py_DECREF(size);
 			Py_DECREF(data);
 			PyList_Append(lst, tuple);                              // append tuple to list
 			Py_DECREF(tuple);
+			
 		}
 		else
 		{
@@ -328,8 +356,11 @@ PyObject* Class7zArch_extract_all(CustomObject* self, PyObject* Py_UNUSED(ignore
 		}
 		
 		//// make line and add to report string
+
 		report.append(_get_report_line(path, size, data));
+
 		report.append(L"\n");
+
 	}
 	
 	PyObject* py_report{ PyUnicode_FromString(wstring_to_utf8(report).c_str()) }; // create Python str object from std::wstring
