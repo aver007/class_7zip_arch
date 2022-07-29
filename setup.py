@@ -3,7 +3,7 @@ from setuptools import Extension, setup, find_packages
 
 setup(
     name="class_7zip_arch",
-    version='1.3',
+    version='1.3.2',
     description='Python extension for using 7zip.dll in memory (Example in test/test.py)',
     url='https://github.com/aver007/class_7zip_arch',
     python_requires=">=3.8, <4",

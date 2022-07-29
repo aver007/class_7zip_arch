@@ -5,3 +5,4 @@ class_7z_arch/x64/*
 build/
 dist/
 class_7zip_arch.egg-info/*
+class_7zip_arch.egg-info/
